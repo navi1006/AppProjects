@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart To-Do</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <h1>Smart To-Do</h1>
+      <p class="subtitle">Type a task in plain words. Category, due date and priority are picked up from what you write.</p>
+    </div>
+    <button id="themeToggle" class="ghost" type="button" aria-label="Toggle dark mode">Theme</button>
+  </header>
+
+  <main>
+    <section class="composer" aria-label="Add task">
+      <form id="addForm" autocomplete="off">
+        <input id="taskInput" type="text" placeholder="e.g. Pay rent by Friday, call the dentist tomorrow, someday learn guitar" aria-label="New task" required />
+        <button type="submit" class="primary">Add</button>
+      </form>
+      <div id="preview" class="preview" aria-live="polite"></div>
+    </section>
+
+    <section class="stats" aria-label="Summary">
+      <div class="stat"><span class="stat-value" id="statOpen">0</span><span class="stat-label">Open</span></div>
+      <div class="stat stat-urgent"><span class="stat-value" id="statUrgent">0</span><span class="stat-label">Urgent</span></div>
+      <div class="stat"><span class="stat-value" id="statToday">0</span><span class="stat-label">Due today or overdue</span></div>
+      <div class="stat"><span class="stat-value" id="statDone">0%</span><span class="stat-label">Completed</span></div>
+    </section>
+
+    <section class="toolbar" aria-label="Filters">
+      <div class="segmented" role="tablist" aria-label="Group by">
+        <button type="button" data-group="priority" class="active">By priority</button>
+        <button type="button" data-group="category">By category</button>
+      </div>
+      <input id="search" type="search" placeholder="Search tasks" aria-label="Search tasks" />
+      <label class="check"><input id="showDone" type="checkbox" /> Show completed</label>
+    </section>
+    <div id="categoryChips" class="chips" aria-label="Filter by category"></div>
+
+    <section id="board" class="board" aria-label="Tasks"></section>
+  </main>
+
+  <dialog id="editDialog">
+    <form method="dialog" id="editForm">
+      <h2>Edit task</h2>
+      <label>Task<input id="editText" type="text" required /></label>
+      <div class="row">
+        <label>Category<select id="editCategory"></select></label>
+        <label>Priority<select id="editPriority"></select></label>
+      </div>
+      <label>Due date<input id="editDue" type="date" /></label>
+      <p class="hint">Set category or priority to <em>Auto</em> to let the context decide. Auto priority updates as the due date gets closer.</p>
+      <div class="dialog-actions">
+        <button value="cancel" class="ghost" formnovalidate>Cancel</button>
+        <button value="save" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <template id="cardTpl">
+    <article class="card">
+      <input type="checkbox" class="done-toggle" aria-label="Mark complete" />
+      <div class="card-body">
+        <p class="card-text"></p>
+        <div class="card-meta"></div>
+        <details class="why"><summary>Why this priority?</summary><ul></ul></details>
+      </div>
+      <div class="card-actions">
+        <button type="button" class="ghost edit" aria-label="Edit">✎</button>
+        <button type="button" class="ghost delete" aria-label="Delete">✕</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="classifier.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
