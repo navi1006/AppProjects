@@ -4,6 +4,21 @@ A to-do dashboard that reads what you type and works out the **category**, **due
 
 Open `index.html` in a browser. There's no build step and nothing to install. Tasks are saved in your browser's localStorage.
 
+## Install on iPhone
+
+The dashboard is an installable web app (PWA). Once it's hosted at an `https://` address:
+
+1. Open that address in **Safari** on the iPhone.
+2. Tap the **Share** button, then **Add to Home Screen**, then **Add**.
+3. Open it from the new **To-Do** icon. It runs full-screen and works offline.
+
+Hosting options (any static host works; there's no server code):
+
+- **GitHub Pages:** repo Settings → Pages → Pages only serves from the repo root or `/docs`, so move these files to one of those first, then pick the branch and folder under Settings → Pages.
+- **Netlify Drop:** drag the `todo-dashboard` folder onto https://app.netlify.com/drop to get a free `https://` address in a few seconds.
+
+Tasks are stored on the phone itself. The Home Screen app keeps its own copy, separate from Safari.
+
 ## How it works
 
 `classifier.js` is a rule-based engine that runs entirely in the browser:
