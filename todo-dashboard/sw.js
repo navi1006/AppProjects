@@ -1,5 +1,5 @@
 // Caches the app so it opens with no connection. Bump VERSION when files change.
-const VERSION = "smart-todo-v1";
+const VERSION = "smart-todo-v2";
 const FILES = ["./", "index.html", "styles.css", "classifier.js", "app.js", "manifest.webmanifest",
   "icons/apple-touch-icon.png", "icons/icon-192.png", "icons/icon-512.png"];
 

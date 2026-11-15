@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#3b5bdb" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -17,50 +17,89 @@
   <header class="topbar">
     <div class="brand">
       <h1>Smart To-Do</h1>
-      <p class="subtitle">Type a task in plain words. Category, due date and priority are picked up from what you write.</p>
+      <p class="subtitle">Write tasks the way you'd say them. Dates, times, repeats, category and priority are picked up for you.</p>
     </div>
-    <button id="themeToggle" class="ghost" type="button" aria-label="Toggle dark mode">Theme</button>
+    <button id="themeToggle" class="ghost" type="button" aria-label="Switch between light and dark theme">Theme</button>
   </header>
 
   <main>
     <section class="composer" aria-label="Add task">
       <form id="addForm" autocomplete="off">
-        <input id="taskInput" type="text" placeholder="e.g. Pay rent by Friday, call the dentist tomorrow, someday learn guitar" aria-label="New task" required />
+        <input id="taskInput" type="text" enterkeyhint="done" placeholder="e.g. Pay rent on the 1st · Dentist Tue 3pm · Gym every Monday" aria-label="New task" aria-describedby="preview" />
         <button type="submit" class="primary">Add</button>
       </form>
       <div id="preview" class="preview" aria-live="polite"></div>
     </section>
 
+    <div id="examplesBanner" class="banner" hidden>
+      <span>These are example tasks to show how sorting works.</span>
+      <button type="button" id="clearExamples" class="ghost small">Clear examples</button>
+    </div>
+
+    <section id="focus" class="focus" aria-labelledby="focusTitle" hidden>
+      <h2 id="focusTitle">Do next</h2>
+      <ol id="focusList"></ol>
+    </section>
+
     <section class="stats" aria-label="Summary">
       <div class="stat"><span class="stat-value" id="statOpen">0</span><span class="stat-label">Open</span></div>
-      <div class="stat stat-urgent"><span class="stat-value" id="statUrgent">0</span><span class="stat-label">Urgent</span></div>
-      <div class="stat"><span class="stat-value" id="statToday">0</span><span class="stat-label">Due today or overdue</span></div>
-      <div class="stat"><span class="stat-value" id="statDone">0%</span><span class="stat-label">Completed</span></div>
+      <div class="stat" data-tone="urgent"><span class="stat-value" id="statUrgent">0</span><span class="stat-label">Urgent</span></div>
+      <div class="stat"><span class="stat-value" id="statToday">0</span><span class="stat-label">Due today</span></div>
+      <div class="stat" id="statOverdueTile"><span class="stat-value" id="statOverdue">0</span><span class="stat-label">Overdue</span></div>
     </section>
 
-    <section class="toolbar" aria-label="Filters">
-      <div class="segmented" role="tablist" aria-label="Group by">
-        <button type="button" data-group="priority" class="active">By priority</button>
-        <button type="button" data-group="category">By category</button>
+    <section class="toolbar" aria-label="View and filters">
+      <div class="segmented" role="group" aria-label="Group tasks by">
+        <button type="button" data-group="priority" class="active" aria-pressed="true">By priority</button>
+        <button type="button" data-group="category" aria-pressed="false">By category</button>
       </div>
-      <input id="search" type="search" placeholder="Search tasks" aria-label="Search tasks" />
-      <label class="check"><input id="showDone" type="checkbox" /> Show completed</label>
+      <input id="search" type="search" placeholder="Search tasks  ( / )" aria-label="Search tasks" />
     </section>
-    <div id="categoryChips" class="chips" aria-label="Filter by category"></div>
+    <div id="categoryChips" class="chips" role="group" aria-label="Filter by category"></div>
 
-    <section id="board" class="board" aria-label="Tasks"></section>
+    <section id="board" class="board" aria-label="Open tasks"></section>
+
+    <details id="doneSection" class="done-section" hidden>
+      <summary><span id="doneTitle">Completed</span></summary>
+      <div class="done-tools"><button type="button" id="clearDone" class="ghost small">Clear completed</button></div>
+      <div id="doneList" class="done-list"></div>
+    </details>
+
+    <footer class="footer">
+      <span>Tasks are saved on this device only.</span>
+      <button type="button" id="exportBtn" class="linklike">Download backup</button>
+      <label class="linklike" for="importFile">Restore backup</label>
+      <input type="file" id="importFile" accept="application/json,.json" hidden />
+    </footer>
   </main>
 
-  <dialog id="editDialog">
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden>
+    <span id="toastText"></span>
+    <button type="button" id="toastUndo" class="toast-undo">Undo</button>
+  </div>
+
+  <dialog id="editDialog" aria-labelledby="editTitle">
     <form method="dialog" id="editForm">
-      <h2>Edit task</h2>
+      <h2 id="editTitle">Edit task</h2>
       <label>Task<input id="editText" type="text" required /></label>
       <div class="row">
         <label>Category<select id="editCategory"></select></label>
         <label>Priority<select id="editPriority"></select></label>
       </div>
-      <label>Due date<input id="editDue" type="date" /></label>
-      <p class="hint">Set category or priority to <em>Auto</em> to let the context decide. Auto priority updates as the due date gets closer.</p>
+      <div class="row">
+        <label>Due date<input id="editDue" type="date" /></label>
+        <label>Time<input id="editTime" type="time" /></label>
+      </div>
+      <label>Repeat<select id="editRepeat">
+        <option value="">Doesn't repeat</option>
+        <option value="day">Every day</option>
+        <option value="weekday">Every weekday</option>
+        <option value="week">Every week</option>
+        <option value="week2">Every 2 weeks</option>
+        <option value="month">Every month</option>
+        <option value="year">Every year</option>
+      </select></label>
+      <p class="hint">Leave category or priority on <em>Auto</em> and the app decides from the text. Auto priority rises as the due date gets closer. Your changes teach it for next time.</p>
       <div class="dialog-actions">
         <button value="cancel" class="ghost" formnovalidate>Cancel</button>
         <button value="save" class="primary">Save</button>
@@ -70,15 +109,16 @@
 
   <template id="cardTpl">
     <article class="card">
-      <input type="checkbox" class="done-toggle" aria-label="Mark complete" />
+      <input type="checkbox" class="done-toggle" />
       <div class="card-body">
         <p class="card-text"></p>
         <div class="card-meta"></div>
         <details class="why"><summary>Why this priority?</summary><ul></ul></details>
       </div>
       <div class="card-actions">
-        <button type="button" class="ghost edit" aria-label="Edit">✎</button>
-        <button type="button" class="ghost delete" aria-label="Delete">✕</button>
+        <button type="button" class="icon-btn snooze" title="Snooze to tomorrow">💤</button>
+        <button type="button" class="icon-btn edit" title="Edit">✎</button>
+        <button type="button" class="icon-btn delete" title="Delete">✕</button>
       </div>
     </article>
   </template>

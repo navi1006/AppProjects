@@ -21,27 +21,47 @@ Tasks are stored on the phone itself. The Home Screen app keeps its own copy, se
 
 ## How it works
 
-`classifier.js` is a rule-based engine that runs entirely in the browser:
+`classifier.js` is a rule-based engine that runs entirely on the device. Nothing is sent anywhere.
 
-| Signal | Examples | Effect |
-| --- | --- | --- |
-| Category keywords | "client", "rent", "dentist", "groceries", "exam", "flight" | Picks Work, Finance, Health, Shopping, Learning, Travel, Home, Social or General |
-| Due dates | "today", "tomorrow", "by Friday", "next monday", "in 3 days", "Dec 3", "11/20", "2026-12-01", "end of month" | Sets a due date; the closer it is, the higher the priority |
-| Urgency words | "urgent", "ASAP", "blocking", "!!!" | Big priority boost |
-| Importance words | "must", "deadline", "boss", "late fee", "expires" | Moderate boost |
-| Low-urgency words | "someday", "maybe", "no rush", "nice to have" | Lowers priority |
-| Category weight | Health and Finance > Work > Shopping | Small adjustment |
+**What it reads from the text**
 
-These add up to a 0–100 score, which maps to **Urgent** (75+), **High** (55+), **Medium** (30+) or **Low**. Each card has a "Why this priority?" section listing the reasons.
+| Signal | Examples |
+| --- | --- |
+| Category | "client", "rent", "dentist", "groceries", "landlord", "kids", "library", "flight" → Work, Finance, Health, Shopping, Home, Family & Friends, Errands, Travel, Learning or General. Specific words count more than generic ones ("landlord" beats "email"). |
+| Due date | "today", "tomorrow", "by Friday", "next Monday", "this weekend", "on the 1st", "in 3 days", "Dec 3", "11/20", "2026-12-01", "end of month" |
+| Time | "at 3pm", "10:30am", "meeting at 3", "noon", "tonight", "EOD". A time with no day means today. |
+| Repeat | "every Monday", "every other Sunday", "daily", "weekdays", "weekly", "monthly", "yearly" |
+| Quick task | Short tasks starting with "call", "text", "email", "pay", "order"… get a ⚡ Quick tag |
 
-Auto priority is recalculated on every render, so a task due Friday moves up as Friday gets closer and goes to Urgent once it's overdue. You can override the category, priority or due date with the ✎ button; set either one back to *Auto* to hand control back to the classifier.
+**How priority is scored** (start at 30, then add or subtract)
 
-## Features
+| Clue | Points |
+| --- | --- |
+| Urgent words ("urgent", "ASAP", "blocking", "!!!") | +45 |
+| Overdue, or due within 3 hours | +50 |
+| Due today / tomorrow / in 2–3 days / this week | +40 / +28 / +18 / +10 |
+| Important words ("must", "deadline", "late fee", "don't forget") | +10 each, up to +20 |
+| Costly to miss (rent, bills, taxes, passport, prescription, kids pickup…) | +12 |
+| Health, Finance, Work category | +5 / +5 / +4 |
+| Low-stakes ("pizza", "haircut", "tidy") | −15 |
+| "Not urgent", "isn't important" | −25 |
+| "Someday", "maybe", "no rush" | −30 |
+| Repeating routines | date points × 0.6 |
 
-- Live preview of the detected category and priority as you type
-- Summary tiles: open, urgent, due today or overdue, % completed
-- Board grouped by priority or by category, with category filter chips and search
-- Light and dark themes; works on phones
+75+ is **Urgent**, 55+ **High**, 30+ **Medium**, below 30 **Low**. Every card's "Why this priority?" lists the reasons.
+
+**It learns from you.** When you change a task's category or priority, the app remembers the words in that task (ignoring words like "urgent" or "tomorrow" that already carry meaning). Future tasks with those words lean the same way, and the card says so.
+
+## Using it
+
+- **Add** a task in plain words; the preview shows what was detected before you press Add.
+- **Do next** at the top shows the three tasks that matter most right now.
+- **Change priority or category** by tapping its tag on the card. Choose "↺ Auto" to hand it back.
+- **💤 Snooze** pushes a task to tomorrow. **✎ Edit** changes text, date, time and repeat.
+- **Completing** a repeating task moves it to its next date. Completed tasks collect in a section at the bottom.
+- **Undo** appears after every complete, delete, snooze, clear and restore.
+- **Download backup / Restore backup** at the bottom saves your tasks to a file, since they otherwise live only in this browser.
+- Keyboard: `n` new task, `/` search.
 
 ## Tests
 
